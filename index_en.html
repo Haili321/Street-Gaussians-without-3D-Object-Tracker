@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Street Gaussians without 3D Object Tracker</title>
+  <meta name="description" content="A 3D-tracker-free framework for dynamic street-scene reconstruction: 2D tracking + LiDAR fusion + HexPlane motion learning. SOTA on Waymo‑NOTR.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <h1 class="title">Street Gaussians without 3D Object Tracker</h1>
+    <p class="authors">
+      Ruida Zhang<sup>1,2</sup>, Chengxi Li<sup>1</sup>, Chenyangguang Zhang<sup>1</sup>, Xingyu Liu<sup>1</sup>,
+      Haili Yuan<sup>1</sup>, Yanyan Li<sup>2</sup>, Xiangyang Ji<sup>1</sup>, Gim Hee Lee<sup>2</sup>
+    </p>
+    <p class="affiliations"><sup>1</sup>Tsinghua University &nbsp;&nbsp; <sup>2</sup>National University of Singapore</p>
+    <div class="cta">
+      <a class="btn" href="https://arxiv.org/abs/2412.05548" target="_blank" rel="noopener">arXiv</a>
+      <a class="btn" href="#" aria-disabled="true" title="Coming soon">Code (Coming soon)</a>
+      <a class="btn ghost" href="#citation">BibTeX</a>
+      <a class="btn ghost" href="index.html" hreflang="zh-CN">中文</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Demo -->
+  <section id="demo" class="section">
+    <div class="container">
+      <h2>Demo</h2>
+      <p class="subtitle">Comparison between 3D-tracker-based pipelines and our approach for novel view synthesis.</p>
+      <figure class="media">
+        <img src="assets/img/figure1_core.png" alt="3D tracker pipeline vs. Ours (Figure 1)" loading="lazy">
+        <figcaption>Methods relying on 3D trackers are sensitive to pose errors and generalize poorly. We leverage a 2D foundation model for tracking and learn point-wise motion in an implicit feature space, automatically correcting tracking errors and improving robustness across diverse scenes (Figure 1).</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Overview -->
+  <section id="overview" class="section">
+    <div class="container">
+      <h2>Overview</h2>
+      <p>We introduce a <strong>3D-tracker-free</strong> framework for dynamic street-scene reconstruction. The system fuses multi-view <strong>2D tracking</strong> with LiDAR to obtain robust 3D trajectories, and then learns <strong>per-point motion</strong> in a HexPlane feature space to correct tracking errors and recover missed detections. The approach remains robust under occlusions and long-range cases.</p>
+
+      <ul>
+        <li><strong>Robust tracking:</strong> 2D tracking + 3D fusion to estimate per-frame poses without any 3D tracker.</li>
+        <li><strong>Implicit motion learning:</strong> point-wise spatio-temporal motion on HexPlane with early supervision then self-correction.</li>
+        <li><strong>End-to-end reconstruction & rendering:</strong> efficient 3DGS/4DGS-based rendering for high-quality novel view synthesis on long sequences.</li>
+      </ul>
+
+      <figure class="media">
+        <img src="assets/img/figure2_method.png" alt="Method overview (Figure 2)" loading="lazy">
+        <figcaption>Pipeline: 2D tracking & LiDAR fusion → object model initialization → HexPlane motion learning → novel view synthesis (Figure 2).</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="section">
+    <div class="container">
+      <h2>Results</h2>
+      <p>On Waymo‑NOTR, our method achieves SOTA across <strong>both reconstruction and novel view synthesis</strong>: vs. S3Gaussian, <strong>+2.66 dB DPSNR</strong> and <strong>+0.099 DSSIM</strong> on dynamic regions; vs. Street Gaussians, <strong>+1.87 dB PSNR</strong> overall.</p>
+
+      <figure class="media">
+        <img src="assets/img/table1_results.png" alt="Table 1: Quantitative comparison on NOTR" loading="lazy">
+        <figcaption>Table 1: Quantitative comparison with prior art. Best/second-best highlighted.</figcaption>
+      </figure>
+
+      <h3>Qualitative</h3>
+      <figure class="media">
+        <a href="assets/img/figure3_qualitative.png" data-lightbox>
+          <img src="assets/img/figure3_qualitative.png" alt="Figure 3: Qualitative comparison (click to zoom)" loading="lazy">
+        </a>
+        <figcaption>Figure 3: Qualitative examples across multiple scenes. Click to zoom.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Analysis / optional -->
+  <section id="analysis" class="section">
+    <div class="container">
+      <h2>Analysis</h2>
+      <p>Our tracking and motion learning remain robust under occlusions and long ranges. Error statistics and ablations in the paper further validate the design.</p>
+    </div>
+  </section>
+
+  <!-- Citation -->
+  <section id="citation" class="section">
+    <div class="container">
+      <h2>Citation</h2>
+      <pre class="code"><code>@article{zhang2024streetgaussians_no3d,
+  title={Street Gaussians without 3D Object Tracker},
+  author={Ruida Zhang and Chengxi Li and Chenyangguang Zhang and Xingyu Liu and Haili Yuan and Yanyan Li and Xiangyang Ji and Gim Hee Lee},
+  journal={arXiv preprint arXiv:2412.05548},
+  year={2024}
+}</code></pre>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© <span id="year"></span> THU & NUS Authors.</p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
