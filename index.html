@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Street Gaussians without 3D Object Tracker — Project Page</title>
-  <meta name="description" content="Project page for Street Gaussians without 3D Object Tracker.">
+  <title>Street Gaussians without 3D Object Tracker</title>
+  <meta name="description" content="一种无需 3D 目标跟踪器的街景动态重建方法：2D 跟踪 + LiDAR 融合 + HexPlane 点级运动学习，在 Waymo‑NOTR 上取得 SOTA。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -21,8 +21,9 @@
     <p class="affiliations"><sup>1</sup>Tsinghua University &nbsp;&nbsp; <sup>2</sup>National University of Singapore</p>
     <div class="cta">
       <a class="btn" href="https://arxiv.org/abs/2412.05548" target="_blank" rel="noopener">arXiv</a>
-      <a class="btn" href="#" aria-disabled="true" title="Coming soon">Code (Coming soon)</a>
+      <a class="btn" href="#" aria-disabled="true" title="即将开源">代码（Coming soon）</a>
       <a class="btn ghost" href="#citation">BibTeX</a>
+      <a class="btn ghost" href="index_en.html" hreflang="en">English</a>
     </div>
   </div>
 </header>
@@ -32,10 +33,10 @@
   <section id="demo" class="section">
     <div class="container">
       <h2>Demo</h2>
-      <p class="subtitle">Comparison between 3D tracker-based Street Gaussians and our approach on novel view synthesis (Fig. 1).</p>
+      <p class="subtitle">对比依赖 3D 目标跟踪器的流程与本方法在新视角合成上的表现。</p>
       <figure class="media">
-        <img src="assets/img/figure1_core.png" alt="Comparison: 3D Object Tracker vs 2D Object Tracker + NVS (Figure 1)" loading="lazy">
-        <figcaption>2D foundation model-based tracking enables robust NVS compared with 3D tracker-based pipelines.</figcaption>
+        <img src="assets/img/figure1_core.png" alt="3D 跟踪器流程 vs 我们的方法（Figure 1）" loading="lazy">
+        <figcaption>现有方法高度依赖目标姿态；3D 跟踪器泛化受限，易导致合成缺陷。我们利用 2D 基础模型做跟踪，并在隐式特征空间学习点级运动，自动纠正跟踪误差，提升在多样场景下的鲁棒性（Figure 1）。</figcaption>
       </figure>
     </div>
   </section>
@@ -44,11 +45,17 @@
   <section id="overview" class="section">
     <div class="container">
       <h2>Overview</h2>
-      <p>We eliminate the dependency on <b>3D object trackers</b> for dynamic street-scene reconstruction. Our pipeline builds a stable object tracking module by combining <b>2D foundation trackers</b> with <b>3D fusion</b> to obtain robust trajectories; then we learn <b>point-wise motion</b> in an implicit feature space (HexPlane) to correct tracking errors and recover missed detections.</p>
-      <p>The method first reconstructs object models and poses as strong initialization using 2D trajectories and LiDAR. Then, following 4DGS/HexPlane, we learn continuous per-point motion and appearance over time. Early training uses predicted trajectories for supervision and later relaxes the constraint to allow self-correction.</p>
+      <p>我们提出一种<strong>无需 3D 目标跟踪器</strong>的街景动态重建方法。系统以 2D 基础模型完成多视角目标跟踪，并与 LiDAR 融合获得稳健的 3D 轨迹；随后在 HexPlane 特征空间学习<strong>点级运动</strong>，可自动纠正跟踪误差与漏检，即便在遮挡和远距离场景下仍保持稳定。</p>
+
+      <ul>
+        <li><strong>稳健跟踪：</strong>2D 跟踪 + 3D 融合，逐帧估计对象位姿，摆脱对 3D tracker 的依赖。</li>
+        <li><strong>隐式运动学习：</strong>在 HexPlane 中学习点级时空运动，前期用预测轨迹监督，后期自适应纠偏。</li>
+        <li><strong>端到端重建与渲染：</strong>结合 3DGS/4DGS 的高效渲染，在长序列街景中实现高质量新视角合成。</li>
+      </ul>
+
       <figure class="media">
-        <img src="assets/img/figure2_method.png" alt="Overview of the proposed method (Figure 2)" loading="lazy">
-        <figcaption>Method overview (Fig. 2). 2D tracking + LiDAR fusion → object model/pose initialization → HexPlane motion learning.</figcaption>
+        <img src="assets/img/figure2_method.png" alt="方法总览（Figure 2）" loading="lazy">
+        <figcaption>方法一览：2D 跟踪与 LiDAR 融合 → 对象模型初始化 → HexPlane 上的点级运动学习 → 新视角合成（Figure 2）。</figcaption>
       </figure>
     </div>
   </section>
@@ -57,31 +64,28 @@
   <section id="results" class="section">
     <div class="container">
       <h2>Results</h2>
-      <p>On the Waymo-NOTR dataset, our approach sets a new state of the art across both <em>scene reconstruction</em> and <em>novel view synthesis</em>. In particular, compared with S3Gaussian we achieve <b>+2.66 dB</b> on DPSNR and <b>+0.099</b> on DSSIM for NVS; compared with Street Gaussians we gain <b>+1.87 dB</b> PSNR overall.</p>
+      <p>在 Waymo‑NOTR 基准上，本方法在<strong>场景重建</strong>与<strong>新视角合成</strong>的全部指标上均取得领先：相较 S3Gaussian，动态区域 <strong>+2.66 dB DPSNR</strong>、<strong>+0.099 DSSIM</strong>；相较 Street Gaussians，整体 <strong>PSNR +1.87 dB</strong>。</p>
+
       <figure class="media">
-        <img src="assets/img/table1_results.png" alt="Table 1: Comparison with state-of-the-art on NOTR" loading="lazy">
-        <figcaption>Table 1: Quantitative comparisons on NOTR (best/second best highlighted).</figcaption>
+        <img src="assets/img/table1_results.png" alt="Table 1：NOTR 上与 SOTA 的定量对比" loading="lazy">
+        <figcaption>Table 1：与现有方法的定量对比，最佳/次佳以粉/蓝高亮显示。</figcaption>
       </figure>
 
       <h3>Qualitative</h3>
       <figure class="media">
         <a href="assets/img/figure3_qualitative.png" data-lightbox>
-          <img src="assets/img/figure3_qualitative.png" alt="Figure 3: Qualitative comparisons (click to zoom)" loading="lazy">
+          <img src="assets/img/figure3_qualitative.png" alt="Figure 3：定性对比（可点击放大）" loading="lazy">
         </a>
-        <figcaption>Qualitative results (Fig. 3): S3Gaussian / Street Gaussian / Ours.</figcaption>
+        <figcaption>Figure 3：多场景定性对比，可点击放大查看细节。</figcaption>
       </figure>
     </div>
   </section>
 
-  <!-- Analysis / Ablation (kept) -->
+  <!-- Analysis / optional -->
   <section id="analysis" class="section">
     <div class="container">
-      <h2>Analysis (Ablation kept)</h2>
-      <p>We maintain the same ablation/analysis visuals as the Chinese page.</p>
-      <figure class="media">
-        <img src="assets/img/figure4_ablation.png" alt="Figure 4 & Table 2: Error histogram and ablation" loading="lazy">
-        <figcaption>Figure 4 & Table 2: Reconstruction error histogram and ablations on NOTR.</figcaption>
-      </figure>
+      <h2>Analysis</h2>
+      <p>跟踪与运动学习模块在强遮挡、远距离等场景下保持鲁棒；误差统计与消融实验进一步验证设计的有效性（详见论文）。</p>
     </div>
   </section>
 
@@ -89,7 +93,7 @@
   <section id="citation" class="section">
     <div class="container">
       <h2>Citation</h2>
-<pre class="code"><code>@article{zhang2024streetgaussians_no3d,
+      <pre class="code"><code>@article{zhang2024streetgaussians_no3d,
   title={Street Gaussians without 3D Object Tracker},
   author={Ruida Zhang and Chengxi Li and Chenyangguang Zhang and Xingyu Liu and Haili Yuan and Yanyan Li and Xiangyang Ji and Gim Hee Lee},
   journal={arXiv preprint arXiv:2412.05548},
@@ -102,7 +106,6 @@
 <footer class="footer">
   <div class="container">
     <p>© <span id="year"></span> THU & NUS Authors.</p>
-    <!-- <p class="small">Static, no-dependency project page. Replace text and images as needed.</p> -->
   </div>
 </footer>
 
