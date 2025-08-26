@@ -1,118 +1,470 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Street Gaussians without 3D Object Tracker</title>
-  <meta name="description" content="A 3D-tracker-free framework for dynamic street-scene reconstruction: 2D tracking + LiDAR fusion + HexPlane motion learning. SOTA on Waymo‑NOTR.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Street Gaussians without 3D Object Tracker</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1296">
+    <meta property="og:image:height" content="840">
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Street Gaussians without 3D Object Tracker" />
+    <meta property="og:description" content="
+    This paper aims to tackle the problem of modeling dynamic urban streets for autonomous driving scenes.
+    Recent methods extend NeRF by incorporating tracked vehicle poses to animate vehicles, enabling photo-realistic view synthesis of dynamic urban street scenes.
+    However, significant limitations are their slow training and rendering speed.
+    We introduce Street Gaussians, a new explicit scene representation that tackles these limitations.
+    Specifically, the dynamic urban scene is represented as a set of point clouds equipped with semantic logits and 3D Gaussians, each associated with either a foreground vehicle or the background.
+    To model the dynamics of foreground object vehicles, each object point cloud is optimized with optimizable tracked poses, along with a 4D spherical harmonics model for the dynamic appearance.
+    The explicit representation allows easy composition of object vehicles and background, which in turn allows for scene editing operations and rendering at 135 FPS (1066 * 1600 resolution) within half an hour of training.
+    The proposed method is evaluated on multiple challenging benchmarks, including KITTI and Waymo Open datasets. Experiments show that the proposed method consistently outperforms state-of-the-art methods across all datasets."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Street Gaussians without 3D Object Tracker" />
+    <meta name="twitter:description" content="
+    This paper aims to tackle the problem of modeling dynamic urban streets for autonomous driving scenes.
+    Recent methods extend NeRF by incorporating tracked vehicle poses to animate vehicles, enabling photo-realistic view synthesis of dynamic urban street scenes.
+    However, significant limitations are their slow training and rendering speed.
+    We introduce Street Gaussians, a new explicit scene representation that tackles these limitations.
+    Specifically, the dynamic urban scene is represented as a set of point clouds equipped with semantic logits and 3D Gaussians, each associated with either a foreground vehicle or the background.
+    To model the dynamics of foreground object vehicles, each object point cloud is optimized with optimizable tracked poses, along with a 4D spherical harmonics model for the dynamic appearance.
+    The explicit representation allows easy composition of object vehicles and background, which in turn allows for scene editing operations and rendering at 135 FPS (1066 * 1600 resolution) within half an hour of training.
+    The proposed method is evaluated on multiple challenging benchmarks, including KITTI and Waymo Open datasets. Experiments show that the proposed method consistently outperforms state-of-the-art methods across all datasets."
+    />
+    <!-- <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%E2%9C%A8&lt;/text&gt;&lt;/svg&gt;"> -->
+    <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛐</text></svg>"> -->
+    <link rel="icon" href="./img/bot-driving-car.png">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script src="js/video_comparison.js"></script>
+    <script src="js/app.js"></script>
+
+    <style>
+        .slick-prev:before,
+        .slick-next:before {
+            color: black;
+
+        }
+
+        /* .container {
+            margin-left: -100px;
+        } */
+        .image-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .image-wrapper {
+            margin: 0 10px;
+            text-align: center;
+        }
+
+        .caption-row {
+            align-items: flex-end;
+        }
+
+        .caption-row .image-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .caption-row .image-wrapper p {
+            margin-top: 10px;
+        }
+    </style>
 </head>
+
 <body>
-<header class="hero">
-  <div class="container">
-    <h1 class="title">Street Gaussians without 3D Object Tracker</h1>
-    <p class="authors">
-      Ruida Zhang<sup>1,2</sup>, Chengxi Li<sup>1</sup>, Chenyangguang Zhang<sup>1</sup>, Xingyu Liu<sup>1</sup>,
-      Haili Yuan<sup>1</sup>, Yanyan Li<sup>2</sup>, Xiangyang Ji<sup>1</sup>, Gim Hee Lee<sup>2</sup>
-    </p>
-    <p class="affiliations"><sup>1</sup>Tsinghua University &nbsp;&nbsp; <sup>2</sup>National University of Singapore</p>
-    <div class="cta">
-      <a class="btn" href="https://arxiv.org/abs/2412.05548" target="_blank" rel="noopener">arXiv</a>
-      <a class="btn" href="#" aria-disabled="true" title="Coming soon">Code (Coming soon)</a>
-      <a class="btn ghost" href="#citation">BibTeX</a>
-    </div>
-  </div>
-</header>
+    <div class="container" id="main">
+        <div class="row">
+            <h2 class="col-md-12 text-center">
+    <b>Street Gaussians without 3D Object Tracker</b>
+    <small>ICCV 2025</small>
+</h2>
 
-<main>
-  <!-- Demo -->
-  <section id="demo" class="section">
-    <div class="container">
-      <h2>Demo</h2>
-      <p class="subtitle">Comparison between 3D-tracker-based pipelines and our approach for novel view synthesis.</p>
-      <figure class="media">
-        <div class="video-container">
-  <iframe src="https://www.youtube.com/embed/0IFzajuDrqQ" title="Demo Video"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen></iframe>
+        </div>
+        <div class="row">
+    <div class="col-md-12 text-center">
+        <ul class="list-inline" aria-label="Authors">
+            <li>Ruida Zhang<sup>1,2</sup></li>
+            <li>Chengxi Li<sup>1</sup></li>
+            <li>Chenyangguang Zhang<sup>1</sup></li>
+            <li>Xingyu Liu<sup>1</sup></li>
+            <li>Haili Yuan<sup>1</sup></li>
+            <li>Yanyan Li<sup>2</sup></li>
+            <li>Xiangyang Ji<sup>1</sup></li>
+            <li>Gim Hee Lee<sup>2</sup></li>
+        </ul>
+        <ul class="list-inline" aria-label="Affiliations">
+            <li>Tsinghua University<sup>1</sup></li>
+            <li>National University of Singapore<sup>2</sup></li>
+        </ul>
+    </div>
 </div>
-        <figcaption>Short demo video (YouTube Shorts).</figcaption>
-      </figure>
+
+
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4 text-center">
+                <ul class="nav nav-pills nav-justified" style="margin-top:10px">
+                <li>
+    <a href="https://arxiv.org/abs/2412.05548" target="_blank" rel="noopener">
+        <img src="img/paper_image.png" height="60" alt="Paper">
+        <h4><strong>Paper</strong></h4>
+    </a>
+</li>
+                <li>
+                    <a href="https://github.com/zju3dv/street_gaussians">
+                    <img src="img/github.png" height="60px">
+                        <h4><strong>Code（链接待替换）</strong></h4>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://drive.google.com/drive/folders/1ghpE_kBwqXiWgiSWAajByjPsmj1y0l1H">
+                    <img src="img/database_icon.png" height="60px">
+                        <h4><strong>Data链接待替换）</strong></h4>
+                    </a>
+                </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!-- YouTube video before pipeline -->
+        <div class="row" style="margin-top:20px">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item"
+                            src="https://www.youtube.com/embed/0IFzajuDrqQ"
+                            title="Overview video"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+<div class="row " style="margin-top:20px">
+            <div class="col-md-8 col-md-offset-2 ">
+                <img src="img/pipeline.jpg" width="100%" >
+                </img>
+            </div>
+            <div class="col-md-8 col-md-offset-2 ">
+                <p class="text-center ">
+                    The pipeline of Street Gaussians without 3D Object Tracker
+                </p>
+            </div>
+        </div>
+
+
+        <div class="row ">
+            <div class="col-md-8 col-md-offset-2 ">
+                <h3>
+                    Abstract
+                </h3>
+                <p class="text-justify ">
+                    待补充
+                </p>
+            </div>
+        </div>
+
+
+
+        <div class="row ">
+            <div class="col-md-8 col-md-offset-2 ">
+                <h3>
+                    Comparisons
+                </h3>
+                <div class="tabs">
+                    <div class="tab" id='compare_video' onclick="showComparison(this)">Video</div>
+                    <div class="tab active" id='compare_image' onclick="showComparison(this)">Single Frame</div>
+                </div>
+
+                <div class="image-row">
+                    <div class="image-wrapper">
+                        <div class="video-compare-container" id="seq25_compare_videoDiv" style="display: none;">
+                            <video class="video" id="seq25_compare_video" loop playsinline autoPlay muted
+                                src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/comparsion/seq_25_combine.mp4" onplay="resizeAndPlay(this)">
+                            </video>
+                            <canvas height=0 class="videoMerge" id="seq25_compare_videoMerge"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="image-wrapper">
+                        <div class="video-compare-container" id="seq06_compare_videoDiv" style="display: none;">
+                            <video class="video" id="seq06_compare_video" loop playsinline autoPlay muted
+                                src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/comparsion/seq_06_combine.mp4" onplay="resizeAndPlay(this)">
+                            </video>
+                            <canvas height=0 class="videoMerge" id="seq06_compare_videoMerge"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-row">
+                    <div class="image-wrapper">
+                        <div class="video-compare-container" id="seq25_compare_imageDiv" style="display: inline;">
+                            <video class="video" id="seq25_compare_image" loop playsinline autoPlay muted
+                                src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/comparsion/seq_25_combine_single.mp4" onplay="resizeAndPlay(this)">
+                            </video>
+                            <canvas height=0 class="videoMerge" id="seq25_compare_imageMerge"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="image-wrapper">
+                        <div class="video-compare-container" id="seq06_compare_imageDiv" style="display: inline;">
+                            <video class="video" id="seq06_compare_image" loop playsinline autoPlay muted
+                                src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/comparsion/seq_06_combine_single.mp4" onplay="resizeAndPlay(this)">
+                            </video>
+                            <canvas height=0 class="videoMerge" id="seq06_compare_imageMerge"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- <div class="video-compare-container" id="seq25_compare_videoDiv" style="display: none;">
+                    <video class="video" id="seq25_compare_video" loop playsinline autoPlay muted
+                        src="https://yunzhiy.github.io/project_page_assets/street_gaussians/comparsion/seq_25_combine.mp4" onplay="resizeAndPlay(this)">
+                    </video>
+                    <canvas height=0 class="videoMerge" id="seq25_compare_videoMerge"></canvas>
+                </div>
+                <div class="video-compare-container" id="seq06_compare_videoDiv" style="display: none;">
+                    <video class="video" id="seq06_compare_video" loop playsinline autoPlay muted
+                        src="https://yunzhiy.github.io/project_page_assets/street_gaussians/comparsion/seq_06_combine.mp4" onplay="resizeAndPlay(this)">
+                    </video>
+                    <canvas height=0 class="videoMerge" id="seq06_compare_videoMerge"></canvas>
+                </div>
+                <div class="video-compare-container" id="seq25_compare_imageDiv" style="display: inline;">
+                    <video class="video" id="seq25_compare_image" loop playsinline autoPlay muted
+                        src="https://yunzhiy.github.io/project_page_assets/street_gaussians/comparsion/seq_25_combine_single.mp4" onplay="resizeAndPlay(this)">
+                    </video>
+                    <canvas height=0 class="videoMerge" id="seq25_compare_imageMerge"></canvas>
+                </div>
+                <div class="video-compare-container" id="seq06_compare_imageDiv" style="display: inline;">
+                    <video class="video" id="seq06_compare_image" loop playsinline autoPlay muted
+                        src="https://yunzhiy.github.io/project_page_assets/street_gaussians/comparsion/seq_06_combine_single.mp4" onplay="resizeAndPlay(this)">
+                    </video>
+                    <canvas height=0 class="videoMerge" id="seq06_compare_imageMerge"></canvas>
+                </div> -->
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Rendering results
+                </h3>
+                <div class="text-center">
+                    <div style="position:relative;">
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/train_031.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/train_333.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_04.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_05.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_10.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_17.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_32.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <video width="100%" loop muted autoplay>
+                                    <source src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/waymo/seq_33.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Decomposition results
+                </h3>
+                <div class="text-center">
+                    <div style="position:relative;">
+
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq04_decompDiv">
+                                    <video class="video" id="seq04_decomp" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/decomposition/seq_04_combine.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq04_decompMerge"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq17_decompDiv">
+                                    <video class="video" id="seq17_decomp" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/decomposition/seq_17_combine.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq17_decompMerge"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Editing results
+                </h3>
+                <div class="text-center">
+                    <div style="position:relative;">
+
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq05_editDiv">
+                                    <video class="video" id="seq05_edit" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/editing/seq05_combine_single.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq05_editMerge"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq06_editDiv">
+                                    <video class="video" id="seq06_edit" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/editing/seq06_combine_single.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq06_editMerge"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Effect of pose optimization
+                </h3>
+                <div class="text-center">
+                    <div style="position:relative;">
+
+                        <div class="image-row">
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq23_pose_optDiv">
+                                    <video class="video" id="seq23_pose_opt" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/pose_opt/seq_23_combine_crop_single.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq23_pose_optMerge"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="image-wrapper">
+                                <div class="video-compare-container" id="seq31_pose_optDiv">
+                                    <video class="video" id="seq31_pose_opt" loop playsinline autoPlay muted
+                                        src="https://raw.githubusercontent.com/yunzhiy/project_page_assets/main/street_gaussians/pose_opt/seq_31_combine_crop_single.mp4" onplay="resizeAndPlay(this)">
+                                    </video>
+                                    <canvas height=0 class="videoMerge" id="seq31_pose_optMerge"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Citation
+                </h3>
+                <div class="form-group col-md-10 col-md-offset-1">
+                    <textarea id="bibtex" class="form-control" readonly>@inproceedings{zhang2025streetgaussians,
+    title   = {Street Gaussians without 3D Object Tracker},
+    author  = {Ruida Zhang and Chengxi Li and Chenyangguang Zhang and Xingyu Liu and Haili Yuan and Yanyan Li and Xiangyang Ji and Gim Hee Lee},
+    booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+    year    = {2025},
+    note    = {arXiv:2412.05548},
+    url     = {https://arxiv.org/abs/2412.05548}
+}</textarea>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <!-- <h3>
+                    Acknowledgements
+                </h3> -->
+                <p class="text-justify">
+                    The website template was borrowed from <a href="http://mgharbi.com/">Michaël Gharbi</a> and <a href="https://jonbarron.info/mipnerf360/">Jon Barron</a>.
+                </p>
+            </div>
+        </div>
     </div>
-  </section>
-
-  <!-- Overview -->
-  <section id="overview" class="section">
-    <div class="container">
-      <h2>Overview</h2>
-      <p>We introduce a <strong>3D-tracker-free</strong> framework for dynamic street-scene reconstruction. The system fuses multi-view <strong>2D tracking</strong> with LiDAR to obtain robust 3D trajectories, and then learns <strong>per-point motion</strong> in a HexPlane feature space to correct tracking errors and recover missed detections. The approach remains robust under occlusions and long-range cases.</p>
-
-      <ul>
-        <li><strong>Robust tracking:</strong> 2D tracking + 3D fusion to estimate per-frame poses without any 3D tracker.</li>
-        <li><strong>Implicit motion learning:</strong> point-wise spatio-temporal motion on HexPlane with early supervision then self-correction.</li>
-        <li><strong>End-to-end reconstruction & rendering:</strong> efficient 3DGS/4DGS-based rendering for high-quality novel view synthesis on long sequences.</li>
-      </ul>
-
-      <figure class="media">
-        <img src="assets/img/figure2_method.png" alt="Method overview (Figure 2)" loading="lazy">
-        <figcaption>Pipeline: 2D tracking & LiDAR fusion → object model initialization → HexPlane motion learning → novel view synthesis (Figure 2).</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- Results -->
-  <section id="results" class="section">
-    <div class="container">
-      <h2>Results</h2>
-      <p>On Waymo‑NOTR, our method achieves SOTA across <strong>both reconstruction and novel view synthesis</strong>: vs. S3Gaussian, <strong>+2.66 dB DPSNR</strong> and <strong>+0.099 DSSIM</strong> on dynamic regions; vs. Street Gaussians, <strong>+1.87 dB PSNR</strong> overall.</p>
-
-      <figure class="media">
-        <img src="assets/img/table1_results.png" alt="Table 1: Quantitative comparison on NOTR" loading="lazy">
-        <figcaption>Table 1: Quantitative comparison with prior art. Best/second-best highlighted.</figcaption>
-      </figure>
-
-      <h3>Qualitative</h3>
-      <figure class="media">
-        <a href="assets/img/figure3_qualitative.png" data-lightbox>
-          <img src="assets/img/figure3_qualitative.png" alt="Figure 3: Qualitative comparison (click to zoom)" loading="lazy">
-        </a>
-        <figcaption>Figure 3: Qualitative examples across multiple scenes. Click to zoom.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- Analysis / optional -->
-  <section id="analysis" class="section">
-    <div class="container">
-      <h2>Analysis</h2>
-      <p>Our tracking and motion learning remain robust under occlusions and long ranges. Error statistics and ablations in the paper further validate the design.</p>
-    </div>
-  </section>
-
-  <!-- Citation -->
-  <section id="citation" class="section">
-    <div class="container">
-      <h2>Citation</h2>
-      <pre class="code"><code>@article{zhang2024streetgaussians_no3d,
-  title={Street Gaussians without 3D Object Tracker},
-  author={Ruida Zhang and Chengxi Li and Chenyangguang Zhang and Xingyu Liu and Haili Yuan and Yanyan Li and Xiangyang Ji and Gim Hee Lee},
-  journal={arXiv preprint arXiv:2412.05548},
-  year={2024}
-}</code></pre>
-    </div>
-  </section>
-</main>
-
-<footer class="footer">
-  <div class="container">
-    <p>© <span id="year"></span> THU & NUS Authors.</p>
-  </div>
-</footer>
-
-<script src="assets/js/main.js"></script>
 </body>
+
 </html>
